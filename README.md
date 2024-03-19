@@ -7,6 +7,7 @@ This repository contains an installation script for setting up a Bittensor miner
 - Installs Docker for containerization
 - Installs PM2 for process management
 - Clones and installs the Compute-Subnet repository and its dependencies
+- Starts the Docker service within Compute Subnet
 - Installs Hashcat for computational tasks
 - Installs NVIDIA drivers and CUDA toolkit for GPU functionality
 - Installs UFW and configures ports for miners
