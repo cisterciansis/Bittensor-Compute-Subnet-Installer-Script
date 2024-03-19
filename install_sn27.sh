@@ -132,12 +132,17 @@ linux_install_pm2() {
 }
 
 linux_install_compute_subnet() {
-    git clone https://github.com/neuralinternet/Compute-Subnet.git
-    cd Compute-Subnet
+    ohai "Cloning Compute-Subnet into ~/Compute-Subnet"
+    mkdir -p ~/Compute-Subnet
+    git clone https://github.com/neuralinternet/Compute-Subnet.git ~/Compute-Subnet/ 2> /dev/null || (cd ~/Compute-Subnet/ ; git pull --ff-only ; git reset --hard ; git clean -xdf)
+    
+    ohai "Installing Compute-Subnet dependencies"
+    cd ~/Compute-Subnet
     $python -m pip install -r requirements.txt
     $python -m pip install -e .
     sudo apt -y install ocl-icd-libopencl1 pocl-opencl-icd
-    cd
+    cd ~
+    exit_on_error $?
 }
 
 linux_install_hashcat() {
@@ -148,7 +153,7 @@ linux_install_hashcat() {
     sudo make install
     export PATH=$PATH:/usr/local/bin/
     echo "export PATH=$PATH">>~/.bashrc
-    cd ..
+    cd ~
 }
 
 linux_install_nvidia_cuda() {
@@ -164,6 +169,34 @@ linux_install_nvidia_cuda() {
     echo "">>~/.bashrc
     echo "PATH=$PATH">>~/.bashrc
     echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH">>~/.bashrc
+}
+
+linux_install_ufw() {
+    sudo apt update
+    sudo apt install -y ufw
+    sudo ufw allow 22/tcp
+}
+
+linux_configure_ufw() {
+    echo "Please enter the port range for UFW (e.g., 2000-4500):"
+    read -p "Enter port range (start-end): " port_range
+
+    if [[ $port_range =~ ^[0-9]+-[0-9]+$ ]]; then
+        start_port=$(echo $port_range | cut -d'-' -f1)
+        end_port=$(echo $port_range | cut -d'-' -f2)
+
+        if [[ $start_port -lt $end_port ]]; then
+            sudo ufw allow $start_port:$end_port/tcp
+            sudo ufw enable
+            echo "UFW configured successfully with port range $port_range"
+        else
+            echo "Invalid port range. The start port should be less than the end port."
+            exit 1
+        fi
+    else
+        echo "Invalid port range format. Please use the format: start-end (e.g., 2000-4500)"
+        exit 1
+    fi
 }
 
 # Do install.
@@ -195,9 +228,10 @@ if [[ "$OS" == "Linux" ]]; then
     echo "bittensor"
     echo "docker"
     echo "pm2"
-    echo "Compute-subnet"
+    echo "compute-subnet"
     echo "hashcat"
     echo "nvidia drivers and cuda toolkit"
+    echo "ufw"
 
     wait_for_user
     linux_install_pre
@@ -208,6 +242,8 @@ if [[ "$OS" == "Linux" ]]; then
     linux_install_compute_subnet
     linux_install_hashcat
     linux_install_nvidia_cuda
+    linux_install_ufw
+    linux_configure_ufw
 
     ohai "Would you like to increase the ulimit? This will allow your miner to run for a longer time"
     wait_for_user
