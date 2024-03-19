@@ -145,7 +145,12 @@ linux_install_compute_subnet() {
     $python -m pip install -r requirements.txt
     $python -m pip install -e .
     sudo apt -y install ocl-icd-libopencl1 pocl-opencl-icd
-    cd ~
+    
+    ohai "Starting Docker service and installing 'at' package"
+    sudo systemctl start docker
+    sudo apt install -y at
+    
+    cd
     exit_on_error $?
 }
 
@@ -182,7 +187,7 @@ linux_install_ufw() {
 }
 
 linux_configure_ufw() {
-    echo "Please enter the port range for UFW (e.g., 2000-4500):"
+    echo "Please enter the port range for UFW (e.g., 2000-5000):"
     read -p "Enter port range (start-end): " port_range
 
     if [[ $port_range =~ ^[0-9]+-[0-9]+$ ]]; then
@@ -198,7 +203,7 @@ linux_configure_ufw() {
             exit 1
         fi
     else
-        echo "Invalid port range format. Please use the format: start-end (e.g., 2000-4500)"
+        echo "Invalid port range format. Please use the format: start-end (e.g., 2000-5000)"
         exit 1
     fi
 }
@@ -256,7 +261,7 @@ if [[ "$OS" == "Linux" ]]; then
     echo ""
     echo "######################################################################"
     echo "##                                                                  ##"
-    echo "##                      BITTENSOR SETUP                             ##"
+    echo "##                      BITTENSOR SN27 SETUP                        ##"
     echo "##                                                                  ##"
     echo "######################################################################"
     echo ""
@@ -293,7 +298,7 @@ elif [[ "$OS" == "Darwin" ]]; then
     echo ""
     echo "######################################################################"
     echo "##                                                                  ##"
-    echo "##                      BITTENSOR SN27 SETUP                        ##"
+    echo "##                      BITTENSOR SETUP                             ##"
     echo "##                                                                  ##"
     echo "######################################################################"
 else
@@ -311,26 +316,26 @@ ohai "Welcome. Installation complete. Please reboot your machine for the changes
 echo "    $ sudo reboot"
 echo ""
 echo "- 1. Create a wallet "
-echo "    $ btcli new_coldkey (for holding funds)"
-echo "    $ btcli new_hotkey (for running miners)"
+echo "    $ btcli w new_coldkey (for holding funds)"
+echo "    $ btcli w new_hotkey (for running miners)"
 echo ""
-echo "- 2. Run a miner on the Compute Subnetwork (SN27). Visit ${tty_underline}https://docs.neuralinternet.ai/products/subnet-27-compute/bittensor-compute-subnet-miner-setup${tty_reset} for UFW Setup and PM2 Instructions "
+echo "- 2. To run a miner on the Compute Subnetwork (SN27) you must first create a wallet pair and register to SN27. Visit ${tty_underline}https://docs.neuralinternet.ai/products/subnet-27-compute/bittensor-compute-subnet-miner-setup${tty_reset} for Instructions "
 echo "    pm2 start ./neurons/miner.py --name MINER --interpreter python3 -- --netuid 27 --subtensor.network finney --wallet.name COLDKEYNAME --wallet.hotkey HOTKEYNAME --axon.port XXXX --axon.external_port XXXX --axon.ip xx.xxx.xxx.xx --axon.external_ip xx.xxx.xxx.xx --logging.debug --miner.blacklist.force_validator_permit --auto_update yes "
 echo ""
 ohai "Extras:"
 echo ""
 echo "- Check your tao balance: "
-echo "    $ btcli overview"
+echo "    $ btcli wallet overview"
 echo ""
 echo "- Stake to your miners:"
-echo "    $ btcli stake"
-echo "    $ btcli unstake"
+echo "    $ btcli stake add"
+echo "    $ btcli stake remove"
 echo ""
 echo "- Create/list/register wallets"
-echo "    $ btcli new_coldkey"
-echo "    $ btcli new_hotkey"
-echo "    $ btcli list"
-echo "    $ btcli register --netuid 1"
+echo "    $ btcli w new_coldkey"
+echo "    $ btcli w new_hotkey"
+echo "    $ btcli s list"
+echo "    $ btcli s register --subtensor.network finney --netuid 27"
 echo ""
 echo "- Use the Python API"
 echo "    $ python3"
