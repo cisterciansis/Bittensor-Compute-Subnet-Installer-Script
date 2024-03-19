@@ -9,6 +9,7 @@ This repository contains an installation script for setting up a Bittensor miner
 - Clones and installs the Compute-Subnet repository and its dependencies
 - Installs Hashcat for computational tasks
 - Installs NVIDIA drivers and CUDA toolkit for GPU acceleration
+- Installs UFW and configures ports for miners
 - Provides a convenient one-line command for easy installation
 
 ## Usage
