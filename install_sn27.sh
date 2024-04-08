@@ -94,6 +94,8 @@ linux_install_pre() {
 }
 
 linux_install_subtensor() {
+    ohai "Cloning subtensor into ~/subtensor"
+    mkdir -p ~/subtensor
     sudo apt install -y git
     git clone https://github.com/opentensor/subtensor.git
     cd subtensor
