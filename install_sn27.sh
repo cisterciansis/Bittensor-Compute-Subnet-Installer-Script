@@ -93,6 +93,14 @@ linux_install_pre() {
     exit_on_error $?
 }
 
+linux_install_subtensor() {
+    sudo apt install -y git
+    git clone https://github.com/opentensor/subtensor.git
+    cd subtensor
+    sudo ./scripts/run/subtensor.sh -e docker --network mainnet --node-type lite
+    cd ..
+}
+
 linux_install_python() {
     which $python
     if [[ $? != 0 ]] ; then
@@ -135,6 +143,17 @@ linux_install_pm2() {
     sudo npm install pm2 -g
 }
 
+linux_install_nvidia_docker() {
+    ohai "Installing NVIDIA Docker support"
+    cd
+    distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+    curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+    curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+    sudo apt update
+    sudo apt-get install -y nvidia-container-toolkit
+    sudo apt install -y nvidia-docker2
+}
+
 linux_install_compute_subnet() {
     ohai "Cloning Compute-Subnet into ~/Compute-Subnet"
     mkdir -p ~/Compute-Subnet
@@ -153,7 +172,7 @@ linux_install_compute_subnet() {
     sudo systemctl start docker
     sudo apt install -y at
     
-    cd
+    cd ~
     exit_on_error $?
 }
 
@@ -239,8 +258,10 @@ if [[ "$OS" == "Linux" ]]; then
     echo "build-essential"
     echo "python3"
     echo "python3-pip"
+    echo "subtensor"
     echo "bittensor"
     echo "docker"
+    echo "nvidia docker support"
     echo "pm2"
     echo "compute-subnet"
     echo "hashcat"
@@ -249,10 +270,12 @@ if [[ "$OS" == "Linux" ]]; then
 
     wait_for_user
     linux_install_pre
+    linux_install_subtensor
     linux_install_python
     linux_update_pip
     linux_install_bittensor
     linux_install_pm2
+    linux_install_nvidia_docker
     linux_install_compute_subnet
     linux_install_hashcat
     linux_install_nvidia_cuda
