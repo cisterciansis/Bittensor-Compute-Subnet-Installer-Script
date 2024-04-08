@@ -5,6 +5,7 @@ This repository contains an installation script for setting up a Bittensor miner
 
 - Installs Bittensor and its dependencies
 - Installs Docker for containerization
+- Installs Subtensor and Starts a Lite Node on Mainnet
 - Installs PM2 for process management
 - Clones and installs the Compute-Subnet repository and its dependencies
 - Starts the Docker service within Compute Subnet
