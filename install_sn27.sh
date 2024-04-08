@@ -143,10 +143,13 @@ linux_install_compute_subnet() {
     ohai "Installing Compute-Subnet dependencies"
     cd ~/Compute-Subnet
     $python -m pip install -r requirements.txt
+    $python -m pip install --no-deps -r requirements-compute.txt
     $python -m pip install -e .
     sudo apt -y install ocl-icd-libopencl1 pocl-opencl-icd
     
-    ohai "Starting Docker service and installing 'at' package"
+    ohai "Starting Docker service, adding user to docker, and installing 'at' package"
+    sudo groupadd docker
+    sudo usermod -aG docker $USER
     sudo systemctl start docker
     sudo apt install -y at
     
@@ -184,6 +187,7 @@ linux_install_ufw() {
     sudo apt update
     sudo apt install -y ufw
     sudo ufw allow 22/tcp
+    sudo ufw allow 4444
 }
 
 linux_configure_ufw() {
