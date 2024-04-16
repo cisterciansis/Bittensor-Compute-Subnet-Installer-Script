@@ -96,11 +96,13 @@ linux_install_pre() {
 linux_install_subtensor() {
     ohai "Cloning subtensor into ~/subtensor"
     mkdir -p ~/subtensor
-    sudo apt install -y git
-    git clone https://github.com/opentensor/subtensor.git
-    cd subtensor
-    sudo ./scripts/run/subtensor.sh -e docker --network mainnet --node-type lite
-    cd ..
+    git clone https://github.com/opentensor/subtensor.git ~/subtensor 2> /dev/null || (cd ~/subtensor ; git pull --ff-only ; git reset --hard ; git clean -xdf)
+    
+    ohai "Running subtensor script"
+    chmod +x ~/subtensor/scripts/run/subtensor.sh
+    sudo ~/subtensor/scripts/run/subtensor.sh -e docker --network mainnet --node-type lite
+    
+    exit_on_error $?
 }
 
 linux_install_python() {
