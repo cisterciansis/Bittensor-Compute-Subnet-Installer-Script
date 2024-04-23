@@ -98,7 +98,43 @@ linux_install_subtensor() {
     mkdir -p ~/subtensor
     sudo apt install -y git
     git clone https://github.com/opentensor/subtensor.git
-    cd subtensor
+
+    ohai "Running subtensor script"
+    cd ~/subtensor
+    sudo ~/subtensor/scripts/run/subtensor.sh -e docker --network mainnet --node-type lite
+}
+
+linux_create_subtensor_service() {
+    ohai "Creating systemd service file for Subtensor node"
+
+    # Get the current user's username
+    username=$(whoami)
+
+    # Create the systemd service file
+    cat > /etc/systemd/system/subtensor.service <<EOL
+[Unit]
+Description=Subtensor Node
+After=network.target
+
+[Service]
+ExecStart=/home/$username/subtensor/scripts/run/subtensor.sh -e docker --network mainnet --node-type lite
+Restart=always
+User=$username
+
+[Install]
+WantedBy=multi-user.target
+EOL
+
+    # Reload the systemd configuration
+    sudo systemctl daemon-reload
+
+    # Enable the Subtensor service to start automatically on system boot
+    sudo systemctl enable subtensor.service
+
+    # Start the Subtensor service
+    sudo systemctl start subtensor.service
+
+    echo "Subtensor node systemd service created and started."
 }
 
 linux_install_python() {
@@ -165,6 +201,16 @@ linux_install_compute_subnet() {
     $python -m pip install --no-deps -r requirements-compute.txt
     $python -m pip install -e .
     sudo apt -y install ocl-icd-libopencl1 pocl-opencl-icd
+
+    ohai "Configuring wandb API key"
+    if [ -f ".env.example" ]; then
+        cp .env.example .env
+        read -p "Enter your wandb API key: " wandb_api_key
+        sed -i "s/WANDB_API_KEY=\"your_api_key\"/WANDB_API_KEY=\"$wandb_api_key\"/" .env
+        echo "wandb API key configured successfully."
+    else
+        echo "Error: .env.example file not found."
+    fi
     
     ohai "Starting Docker service, adding user to docker, and installing 'at' package"
     sudo groupadd docker
@@ -271,6 +317,7 @@ if [[ "$OS" == "Linux" ]]; then
     wait_for_user
     linux_install_pre
     linux_install_subtensor
+    linux_create_subtensor_service
     linux_install_python
     linux_update_pip
     linux_install_bittensor
