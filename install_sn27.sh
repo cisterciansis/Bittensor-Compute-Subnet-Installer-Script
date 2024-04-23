@@ -95,12 +95,13 @@ linux_install_pre() {
 
 linux_install_subtensor() {
     ohai "Cloning subtensor into ~/subtensor"
-    mkdir -p ~/subtensor
-    sudo apt install -y git
-    git clone https://github.com/opentensor/subtensor.git
+    sudo mkdir -p ~/subtensor
+    sudo chown -R $USER:$USER ~/subtensor
+    git clone https://github.com/opentensor/subtensor.git ~/subtensor 2> /dev/null || (cd ~/subtensor ; git pull --ff-only ; git reset --hard ; git clean -xdf)
 
     ohai "Running subtensor script"
     cd ~/subtensor
+    chmod +x ~/subtensor/scripts/run/subtensor.sh
     sudo ~/subtensor/scripts/run/subtensor.sh -e docker --network mainnet --node-type lite
 }
 
@@ -111,7 +112,7 @@ linux_create_subtensor_service() {
     username=$(whoami)
 
     # Create the systemd service file
-    cat > /etc/systemd/system/subtensor.service <<EOL
+    sudo tee /etc/systemd/system/subtensor.service > /dev/null <<EOL
 [Unit]
 Description=Subtensor Node
 After=network.target
