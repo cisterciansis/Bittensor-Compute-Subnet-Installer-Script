@@ -7,12 +7,14 @@ This repository contains an installation script for setting up a Bittensor miner
 - Installs Docker for containerization
 - Installs NVIDIA docker support for optimized GPU functionality
 - Installs Subtensor and Starts a Lite Node on Mainnet
+- Adds the Subtensor script to the system's startup process
 - Installs PM2 for process management
 - Clones and installs the Compute-Subnet repository and its dependencies
 - Starts the Docker service within Compute Subnet
 - Installs Hashcat for computational tasks
 - Installs NVIDIA drivers and CUDA toolkit for GPU functionality
 - Installs UFW and configures ports for miners
+- Configures the users Wanb API key for logging purposes
 - Provides a convenient one-line command for easy installation
 
 ## Usage
