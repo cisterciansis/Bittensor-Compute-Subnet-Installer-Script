@@ -105,39 +105,6 @@ linux_install_subtensor() {
     sudo ~/subtensor/scripts/run/subtensor.sh -e docker --network mainnet --node-type lite
 }
 
-linux_create_subtensor_service() {
-    ohai "Creating systemd service file for Subtensor node"
-
-    # Get the current user's username
-    username=$(whoami)
-
-    # Create the systemd service file
-    sudo tee /etc/systemd/system/subtensor.service > /dev/null <<EOL
-[Unit]
-Description=Subtensor Node
-After=network.target
-
-[Service]
-ExecStart=/home/$username/subtensor/scripts/run/subtensor.sh -e docker --network mainnet --node-type lite
-Restart=always
-User=$username
-
-[Install]
-WantedBy=multi-user.target
-EOL
-
-    # Reload the systemd configuration
-    sudo systemctl daemon-reload
-
-    # Enable the Subtensor service to start automatically on system boot
-    sudo systemctl enable subtensor.service
-
-    # Start the Subtensor service
-    sudo systemctl start subtensor.service
-
-    echo "Subtensor node systemd service created and started."
-}
-
 linux_install_python() {
     which $python
     if [[ $? != 0 ]] ; then
@@ -318,7 +285,6 @@ if [[ "$OS" == "Linux" ]]; then
     wait_for_user
     linux_install_pre
     linux_install_subtensor
-    linux_create_subtensor_service
     linux_install_python
     linux_update_pip
     linux_install_bittensor
