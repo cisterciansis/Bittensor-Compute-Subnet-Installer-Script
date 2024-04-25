@@ -7,7 +7,6 @@ This repository contains an installation script for setting up a Bittensor miner
 - Installs Docker for containerization
 - Installs NVIDIA docker support for optimized GPU functionality
 - Installs Subtensor and Starts a Lite Node on Mainnet
-- Adds the Subtensor script to the system's startup process
 - Installs PM2 for process management
 - Clones and installs the Compute-Subnet repository and its dependencies
 - Starts the Docker service within Compute Subnet
